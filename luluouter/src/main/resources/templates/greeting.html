@@ -1,0 +1,24 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Getting Started: Serving Web Content</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script src="js/angular.min.js"></script>
+    
+    <script>
+var app = angular.module('myApp', []);
+app.controller('uploadCtrl', function($scope, $http) {
+  $http.get("/shadows")
+  .then(function (response) {$scope.names = response.data;});
+});
+</script>
+</head>
+<body ng-app="myApp">
+
+<div ng-controller="uploadCtrl">
+{{names}}
+</div>
+
+    Hello, World~
+</body>
+</html>
