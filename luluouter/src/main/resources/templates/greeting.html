@@ -11,14 +11,24 @@ app.controller('uploadCtrl', function($scope, $http) {
   $http.get("/shadows")
   .then(function (response) {$scope.names = response.data;});
 });
+app.controller('pipelistCtrl', function($scope, $http) {
+	  $http.get("/shadows")
+	  .then(function (response) {$scope.names = response.data;});
+	});
 </script>
 </head>
 <body ng-app="myApp">
 
 <div ng-controller="uploadCtrl">
-{{names}}
+<input />
 </div>
 
     Hello, World~
+    
+<div ng-controller="pipelistCtrl">
+{{names}}
+</div>
+    
+    
 </body>
 </html>

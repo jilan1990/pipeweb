@@ -14,33 +14,33 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.alibaba.fastjson.JSON;
 
+import luluouter.controller.model.Pigeon;
 import luluouter.data.inner.InnerDataMaster;
-import luluouter.msg.outer.ProxyServerMaster;
 
 public class InnerMsgClient implements Runnable {
-    private final static int FLAG_MSG_GET_PORT = 1024;
+    private final static int FLAG_MSG_HELLO = 2017;
     private final static int FLAG_MSG_CREATE_DATA_PIPE = 2048;
     private final static int FLAG_MSG_HEART_BEAT = 1986;
     private final static String MSG_KEY_HEART_BEAT = "heartBeat";
 
     private BlockingQueue<Map<String, Object>> outQueue = new LinkedBlockingQueue<Map<String, Object>>();
 
-    private int proxyPort;
+    private Pigeon pigeon;
+
     private final Socket inner;
-    private final String key;
 
     private volatile boolean stop = true;
 
     public InnerMsgClient(Socket inner) {
         this.inner = inner;
-        key = String.valueOf(inner.getRemoteSocketAddress());
         stop = false;
-        System.out.println("InnerMsgClient:" + key);
+        System.out.println("InnerMsgClient:" + inner.getRemoteSocketAddress());
     }
 
     @Override
     public void run() {
-        try (OutputStream outputStream = inner.getOutputStream();
+        try (Socket closeSocket = inner;
+                OutputStream outputStream = inner.getOutputStream();
                 DataOutputStream out = new DataOutputStream(outputStream);
                 InputStream inputStream = inner.getInputStream();
                 DataInputStream in = new DataInputStream(inputStream);) {
@@ -49,6 +49,7 @@ public class InnerMsgClient implements Runnable {
                 if (!msg.containsKey(MSG_KEY_HEART_BEAT)) {
                     System.out.println("InnerMsgClient.take:" + msg);
                 }
+
                 String json = JSON.toJSONString(msg);
                 out.writeUTF(json);
                 out.flush();
@@ -73,14 +74,14 @@ public class InnerMsgClient implements Runnable {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } finally {
-            ProxyServerMaster.getInstance().removeInnerMsgClient(proxyPort, key);
-            System.out.println("InnerMsgClient.finally:" + proxyPort + "/" + key);
+            InnerMsgClientMaster.getInstance().removeInnerMsgClient(pigeon);
+            System.out.println("InnerMsgClient.finally:" + pigeon);
         }
     }
 
     public void init() {
         Map<String, Object> msg = new HashMap<String, Object>();
-        msg.put("msgType", FLAG_MSG_GET_PORT);
+        msg.put("msgType", FLAG_MSG_HELLO);
         addMsg(msg);
         System.out.println("InnerMsgClient.init:" + msg);
     }
@@ -92,9 +93,14 @@ public class InnerMsgClient implements Runnable {
 
     private void dealMsg(Map<String, Object> msg) {
         Integer msgType = (Integer) msg.get("msgType");
-        if (msgType == FLAG_MSG_GET_PORT) {
-            proxyPort = (Integer) msg.get("proxyPort");
-            ProxyServerMaster.getInstance().addInnerClient(proxyPort, this);
+        if (msgType == FLAG_MSG_HELLO) {
+            // proxyPort = (Integer) msg.get("proxyPort");
+            String address = String.valueOf(inner.getRemoteSocketAddress());
+            String code = String.valueOf(msg.get("code"));
+
+            pigeon = new Pigeon(address, code);
+
+            InnerMsgClientMaster.getInstance().addInnerMsgClient(pigeon, this);
         } else if (msgType == FLAG_MSG_CREATE_DATA_PIPE) {
             Object indexObj = msg.get("index");
             String indexStr = String.valueOf(indexObj);
@@ -116,10 +122,6 @@ public class InnerMsgClient implements Runnable {
         msg.put("msgType", FLAG_MSG_CREATE_DATA_PIPE);
         msg.put("index", theIndex);
         addMsg(msg);
-    }
-
-    public String getKey() {
-        return key;
     }
 
     public void heartBeat() {

@@ -1,57 +1,58 @@
 package luluouter.msg.outer;
 
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-import luluouter.msg.inner.InnerMsgClient;
+import luluouter.msg.model.Mole;
 
 public class ProxyServerMaster {
 
     private static final ProxyServerMaster INSTANCE = new ProxyServerMaster();
 
-    private Map<Integer, ProxyServer> proxyServers = new ConcurrentHashMap<Integer, ProxyServer>();
+    private Map<Integer, Mole> cover2Mole = new ConcurrentHashMap<Integer, Mole>();
+    private Map<Mole, ProxyServer> proxyServers = new ConcurrentHashMap<Mole, ProxyServer>();
 
     public static ProxyServerMaster getInstance() {
         return INSTANCE;
     }
 
     private ProxyServerMaster() {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(() -> {
-            execute();
-        }, 1, 1, TimeUnit.MINUTES);
-        // executor.shutdown();
     }
 
-    private void execute() {
-        for (Map.Entry<Integer, ProxyServer> entry : proxyServers.entrySet()) {
-            ProxyServer proxyServer = entry.getValue();
-            proxyServer.heartBeat();
-        }
-    }
-
-    public void addInnerClient(int proxyPort, InnerMsgClient innerClient) {
-        ProxyServer proxyServer = proxyServers.get(proxyPort);
-        if (proxyServer == null) {
-            proxyServer = new ProxyServer(proxyPort);
+    public boolean lurkMole(Mole mole) {
+        try {
+            ServerSocket serverSocket = new ServerSocket(mole.getCoverPort());
+            ProxyServer proxyServer = new ProxyServer(mole, serverSocket);
 
             ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
             executor.submit(proxyServer);
             executor.shutdown();
 
-            proxyServers.put(proxyPort, proxyServer);
+            cover2Mole.put(mole.getCoverPort(), mole);
+            proxyServers.put(mole, proxyServer);
+
+            return true;
+        } catch (IOException e) {
+            System.out.println("lurkMole failed:" + mole);
+            e.printStackTrace();
+            return false;
         }
-        proxyServer.addInnerClient(innerClient);
     }
 
-    public void removeInnerMsgClient(int port, String key) {
-        ProxyServer proxyServer = proxyServers.get(port);
+    public void deprecatedMole(Mole mole) {
+        ProxyServer proxyServer = proxyServers.remove(mole);
         if (proxyServer == null) {
             return;
         }
-        proxyServer.removeInnerMsgClient(key);
+        proxyServer.stop();
+    }
+
+    public Set<Mole> getMoles() {
+        return proxyServers.keySet();
     }
 }
