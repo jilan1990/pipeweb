@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import luluouter.controller.model.Pigeon;
+import luluouter.msg.model.Pigeon;
 
 public class InnerMsgClientMaster {
 
@@ -48,5 +48,9 @@ public class InnerMsgClientMaster {
 
     public Set<Pigeon> getPigeons() {
         return innerMsgClients.keySet();
+    }
+
+    public boolean hasPigeon(Pigeon pigeon) {
+        return innerMsgClients.containsKey(pigeon);
     }
 }

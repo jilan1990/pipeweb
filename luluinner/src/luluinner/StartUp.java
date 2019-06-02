@@ -3,8 +3,8 @@ package luluinner;
 import java.util.Date;
 import java.util.Map;
 
-import luluinner.config.ConfigLoad;
-import luluinner.upper.OuterMsgMaster;
+import luluinner.config.ConfigMaster;
+import luluinner.msg.upper.OuterMsgServer;
 
 public class StartUp {
 
@@ -17,13 +17,21 @@ public class StartUp {
         }
         pigeonCode += "|" + ts;
 
-        ConfigLoad configLoad = new ConfigLoad();
-        Map<String, Object> configs = configLoad.loadConfig();
+        ConfigMaster configLoad = ConfigMaster.getInstance();
+
+        configLoad.setPigeonCode(pigeonCode);
+
+        Map<String, Object> configs = configLoad.getConfigs();
         if (configs == null) {
             return;
         }
+        String outer_ip = (String) configs.get("outer_ip");
+        int outer_msg_port = (Integer) configs.get("outer_msg_port");
+        int outer_data_port = (Integer) configs.get("outer_data_port");
 
-        OuterMsgMaster.getInstance().init(configs);
+        System.out.println("OuterMsgMaster.begin:" + configs);
+        OuterMsgServer outerMsgServer = new OuterMsgServer(outer_ip, outer_msg_port, pigeonCode, outer_data_port);
+
+        outerMsgServer.init();
     }
-
 }

@@ -7,8 +7,8 @@ import java.util.Set;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import luluouter.controller.model.Pigeon;
 import luluouter.msg.inner.InnerMsgClientMaster;
+import luluouter.msg.model.Pigeon;
 
 @RestController
 public class PigeonController {

@@ -1,4 +1,4 @@
-package luluouter.controller.model;
+package luluouter.msg.model;
 
 public class Pigeon {
     private final String address;

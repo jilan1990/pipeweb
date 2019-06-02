@@ -5,30 +5,112 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <script src="js/angular.min.js"></script>
     
-    <script>
-var app = angular.module('myApp', []);
-app.controller('uploadCtrl', function($scope, $http) {
-  $http.get("/shadows")
-  .then(function (response) {$scope.names = response.data;});
-});
-app.controller('pipelistCtrl', function($scope, $http) {
-	  $http.get("/shadows")
-	  .then(function (response) {$scope.names = response.data;});
-	});
-</script>
 </head>
 <body ng-app="myApp">
 
 <div ng-controller="uploadCtrl">
-<input />
-</div>
-
+	
+	<div>
+	   <label>
+	       Cover Port:
+	    <input  type="text" name="coverPort" ng-model="coverPort" required/>
+	    </label>
+	
+		<div ng-repeat="pigeon in pigeons">
+			<div>
+				<label>
+				<input name="shadow" type="radio" ng-model="$parent.shadow"  ng-value="pigeon"/>
+				{{pigeon.code}}/{{pigeon.address}}
+				</label>
+			</div>
+		</div>
+		
+	    <label>
+	       Mole Ip:
+	      <input  type="text" name="moleIp" ng-model="moleIp" required/>
+	    </label><br/>
+	   <label>
+	       Mole Port:
+	      <input  type="text" name="molePort" ng-model="molePort" required/>
+	    </label><br/>
+	
+	   <label>{{errorMsg}}</label><br/>
+	   <button ng-click="lurk()">Lurk</button>
+	</div>
     Hello, World~
     
-<div ng-controller="pipelistCtrl">
-{{names}}
+	<div ng-repeat="mole in moles">
+	  <div>{{mole}}</div>
+	</div>
 </div>
+
     
     
+    <script>
+var app = angular.module('myApp', []);
+app.controller('uploadCtrl', function($scope, $http) {
+
+
+	  $http.get("/moles")
+	  .then(function (response) {$scope.moles = response.data;});
+	
+  $http.get("/pigeons")
+  .then(function (response) {
+	  $scope.pigeons = response.data;
+	  if($scope.pigeons.length > 0)
+		  {
+		  $scope.shadow = $scope.pigeons[0];
+		  }
+	  });
+  
+  
+  $scope.lurk = function() {
+	  $scope.errorMsg = '';
+	  
+	  var coverPort = parseInt($scope.coverPort);
+	  if(!coverPort) {
+		  $scope.errorMsg = "error coverPort";
+		  return;
+	  }
+	  
+	  if(!isValidIP($scope.moleIp))
+	  {
+	  $scope.errorMsg = "error moleIp";
+	  return;
+	  }
+	  
+	  var molePort = parseInt($scope.molePort);
+	  if(!molePort) {
+		  $scope.errorMsg = "error molePort";
+		  return;
+	  }
+	  
+	  var params = { };
+	  params.coverPort = coverPort;
+	  params.pigeonCode = $scope.shadow.code;
+	  params.pigeonAddress = $scope.shadow.address;
+	  params.moleIp = $scope.moleIp;
+	  params.molePort = molePort;
+	  console.log(JSON.stringify(params));
+
+	  $http.post("/addmole", params)
+	  .success(function (response) {
+		  console.log(response);
+
+		  $http.get("/moles")
+		  .then(function (response) {$scope.moles = response.data;});
+		  
+		  });
+  }
+
+  function isValidIP(ip)
+  {   
+      var reg =  /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/
+      
+      return reg.test(ip);   
+  }
+   
+	});
+</script>
 </body>
 </html>

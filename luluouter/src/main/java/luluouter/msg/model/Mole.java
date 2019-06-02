@@ -1,6 +1,5 @@
 package luluouter.msg.model;
 
-import luluouter.controller.model.Pigeon;
 
 public class Mole {
     private final Pigeon pigeon;

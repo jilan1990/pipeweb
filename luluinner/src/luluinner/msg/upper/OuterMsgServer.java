@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson.JSON;
 
@@ -18,25 +20,42 @@ import luluinner.pipe.Pipe;
 import luluinner.util.Constants;
 import luluinner.util.SocketUtil;
 
-public class OuterMsgServer implements Runnable {
-    private final static int FLAG_MSG_GET_PORT = 1024;
+public class OuterMsgServer {
+    private final static int FLAG_MSG_HELLO = 2017;
     private final static int FLAG_MSG_CREATE_DATA_PIPE = 2048;
     private final static String MSG_KEY_HEART_BEAT = "heartBeat";
 
-    private Socket socket;
-    private Map<String, Object> configs;
-    private volatile long lastHeartBeatTs;
+    private final String outer_ip;
+    private final int outer_msg_port;
 
-    public OuterMsgServer(Socket socket, Map<String, Object> configs) {
-        this.socket = socket;
-        this.configs = configs;
-        lastHeartBeatTs = System.currentTimeMillis();
-        System.out.println("OuterMsgServer:" + socket.getRemoteSocketAddress());
+    private final int outer_data_port;
+    private final String pigeonCode;
+
+    private volatile long lastHeartBeatTs = 0;
+
+    public OuterMsgServer(String outer_ip, int outer_msg_port, String pigeonCode, int outer_data_port) {
+        this.outer_ip = outer_ip;
+        this.outer_msg_port = outer_msg_port;
+        this.pigeonCode = pigeonCode;
+        this.outer_data_port = outer_data_port;
+
+        System.out.println("OuterMsgServer:" + outer_ip + "/" + outer_msg_port + "/" + pigeonCode);
     }
 
-    @Override
-    public void run() {
-        try (OutputStream outputStream = socket.getOutputStream();
+    public void init() {
+        ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+        scheduledExecutor.scheduleAtFixedRate(() -> {
+            if (isTimeOut()) {
+                System.out.println(
+                        "OuterMsgServer.restart.outerMsgServer:" + outer_ip + "/" + outer_msg_port + "/" + pigeonCode);
+                openTelegraph();
+            }
+        }, 0, Constants.RESTART_PERIOD, TimeUnit.MILLISECONDS);
+    }
+
+    public void openTelegraph() {
+        try (Socket socket = new Socket(outer_ip, outer_msg_port);
+                OutputStream outputStream = socket.getOutputStream();
                 DataOutputStream out = new DataOutputStream(outputStream);
                 InputStream inputStream = socket.getInputStream();
                 DataInputStream in = new DataInputStream(inputStream);) {
@@ -61,7 +80,7 @@ public class OuterMsgServer implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            System.out.println("OuterMsgServer.finally:" + configs);
+            System.out.println("OuterMsgServer.finally:" + outer_ip + "/" + outer_msg_port + "/" + pigeonCode);
         }
     }
 
@@ -70,22 +89,19 @@ public class OuterMsgServer implements Runnable {
         Map<String, Object> result = new HashMap<String, Object>();
 
         Integer msgType = (Integer) msg.get("msgType");
-        if (msgType == FLAG_MSG_GET_PORT) {
-            result.put("msgType", FLAG_MSG_GET_PORT);
-            result.put("proxyPort", configs.get("inner_port"));
+        if (msgType == FLAG_MSG_HELLO) {
+            result.put("msgType", FLAG_MSG_HELLO);
+            result.put("code", pigeonCode);
         } else if (msgType == FLAG_MSG_CREATE_DATA_PIPE) {
             Object indexObj = msg.get("index");
             String indexStr = String.valueOf(indexObj);
             Long index = Long.parseLong(indexStr);
 
+            String inner_ip = (String) msg.get("inner_ip");
+            int inner_port = (Integer) msg.get("inner_port");
+
             result.put("msgType", FLAG_MSG_CREATE_DATA_PIPE);
             result.put("index", index);
-
-            String inner_ip = (String) configs.get("inner_ip");
-            int inner_port = (Integer) configs.get("inner_port");
-
-            String outer_ip = (String) configs.get("outer_ip");
-            int outer_data_port = (Integer) configs.get("outer_data_port");
 
             try {
                 Socket innerSocket = new Socket(inner_ip, inner_port);

@@ -55,4 +55,9 @@ public class ProxyServerMaster {
     public Set<Mole> getMoles() {
         return proxyServers.keySet();
     }
+
+    public void removeMole(Mole mole) {
+        cover2Mole.remove(mole.getCoverPort());
+        proxyServers.remove(mole);
+    }
 }

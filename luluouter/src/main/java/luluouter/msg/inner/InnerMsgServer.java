@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class InnerMsgServer implements Runnable {
+
     private int port;
 
     public InnerMsgServer(int port) {
@@ -21,6 +22,7 @@ public class InnerMsgServer implements Runnable {
                 Socket client = serverSocket.accept();
                 //
                 InnerMsgClient innerClient = new InnerMsgClient(client);
+                innerClient.init();
 
                 ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
                 executor.submit(innerClient);

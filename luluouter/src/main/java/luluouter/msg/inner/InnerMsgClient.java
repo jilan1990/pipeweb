@@ -14,8 +14,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.alibaba.fastjson.JSON;
 
-import luluouter.controller.model.Pigeon;
 import luluouter.data.inner.InnerDataMaster;
+import luluouter.msg.model.Mole;
+import luluouter.msg.model.Pigeon;
 
 public class InnerMsgClient implements Runnable {
     private final static int FLAG_MSG_HELLO = 2017;
@@ -115,12 +116,16 @@ public class InnerMsgClient implements Runnable {
         }
     }
 
-    public void createPipes(Socket outerClient) {
+    public void createPipes(Socket outerClient, Mole mole) {
         long theIndex = InnerDataMaster.getInstance().addOuterClient(outerClient);
 
         Map<String, Object> msg = new HashMap<String, Object>();
         msg.put("msgType", FLAG_MSG_CREATE_DATA_PIPE);
         msg.put("index", theIndex);
+
+        msg.put("inner_ip", mole.getIp());
+        msg.put("inner_port", mole.getPort());
+
         addMsg(msg);
     }
 

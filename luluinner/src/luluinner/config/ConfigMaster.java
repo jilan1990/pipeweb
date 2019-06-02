@@ -9,12 +9,28 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public class ConfigLoad {
+public class ConfigMaster {
     private String path = "conf/pipe.properties";
 
-    public Map<String, Object> loadConfig() {
+    private static final ConfigMaster INSTANCE = new ConfigMaster();
+
+    private Map<String, Object> configs = null;
+    private String pigeonCode = null;
+
+    private ConfigMaster() {
+        init();
+    }
+
+    public static ConfigMaster getInstance() {
+        return INSTANCE;
+    }
+
+    private void init() {
         File file = new File(path);
-        Map<String, Object> configs = getConfig(file);
+        configs = getConfig(file);
+    }
+
+    public Map<String, Object> getConfigs() {
         return configs;
     }
 
@@ -51,4 +67,11 @@ public class ConfigLoad {
         }
     }
 
+    public void setPigeonCode(String pigeonCode) {
+        this.pigeonCode = pigeonCode;
+    }
+
+    public String getPigeonCode() {
+        return pigeonCode;
+    }
 }

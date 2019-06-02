@@ -35,7 +35,9 @@ public class ProxyServer implements Runnable {
                     InnerMsgClient innerMsgClient = InnerMsgClientMaster.getInstance()
                             .getInnerMsgClient(mole.getPigeon());
 
-                    innerMsgClient.createPipes(outerClient);
+                    if (innerMsgClient != null) {
+                        innerMsgClient.createPipes(outerClient, mole);
+                    }
                 });
                 executor.shutdown();
             }
@@ -43,6 +45,7 @@ public class ProxyServer implements Runnable {
             System.out.println("ProxyServer.init: " + e.getMessage());
         } finally {
             System.out.println("ProxyServer.finally:" + mole);
+            ProxyServerMaster.getInstance().removeMole(mole);
         }
     }
 
