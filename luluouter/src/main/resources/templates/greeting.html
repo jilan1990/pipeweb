@@ -5,6 +5,22 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <script src="js/angular.min.js"></script>
     
+    <style>
+   table, th , td {
+      border: 1px solid grey;
+      border-collapse: collapse;
+      padding: 5px;
+   }
+   table tr:nth-child(odd) {
+      background-color: #f2f2f2;
+   }
+   table tr:nth-child(even) {
+      background-color: #ffffff;
+   }
+   .redClass {
+     background-color:red;
+   }
+</style>
 </head>
 <body ng-app="myApp">
 
@@ -14,13 +30,13 @@
 	   <label>
 	       Cover Port:
 	    <input  type="text" name="coverPort" ng-model="coverPort" required/>
-	    </label>
+	    </label><br/>
 	
 		<div ng-repeat="pigeon in pigeons">
 			<div>
 				<label>
 				<input name="shadow" type="radio" ng-model="$parent.shadow"  ng-value="pigeon"/>
-				{{pigeon.code}}/{{pigeon.address}}
+				{{pigeon.code}}{{pigeon.address}}
 				</label>
 			</div>
 		</div>
@@ -39,9 +55,31 @@
 	</div>
     Hello, World~
     
-	<div ng-repeat="mole in moles">
+	<div >
 	  <div>{{mole}}</div>
 	</div>
+	
+<table>
+   <tr>
+      <th>Cover Port</th>
+      <th>Pigeon Code</th>
+      <th>Pigeon Address</th>
+      <th>Mole Ip</th>
+      <th>Mole Port</th>
+      <th>Operation</th>
+   </tr>
+   
+   <tr ng-repeat="mole in moles">
+      <td>{{ mole.coverPort }}</td>
+      <td ng-class="{'redClass': !mole.status}">{{ mole.pigeonCode }}</td>
+      <td ng-class="{'redClass': !mole.status}">{{ mole.pigeonAddress }}</td>
+      <td>{{ mole.moleIp }}</td>
+      <td>{{ mole.molePort }}</td>
+      <td><button ng-click="delmole( mole.coverPort )">D</button></td>
+   </tr>
+</table>
+	
+	
 </div>
 
     
@@ -96,10 +134,25 @@ app.controller('uploadCtrl', function($scope, $http) {
 	  $http.post("/addmole", params)
 	  .success(function (response) {
 		  console.log(response);
-
+			
+		  $scope.coverPort = '';
+		  $scope.moleIp = '';
+		  $scope.molePort = '';
+		  
 		  $http.get("/moles")
 		  .then(function (response) {$scope.moles = response.data;});
 		  
+		  });
+  }
+  
+  $scope.delmole = function(coverPort) {
+
+	  $http.delete("/delmole?coverPort="+coverPort)
+	  .success(function (response) {
+		  console.log(response);
+		  
+		  $http.get("/moles")
+		  .then(function (response) {$scope.moles = response.data;});
 		  });
   }
 

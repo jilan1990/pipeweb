@@ -3,6 +3,7 @@ package luluouter.msg.outer;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -44,9 +45,15 @@ public class ProxyServerMaster {
         }
     }
 
-    public void deprecatedMole(Mole mole) {
+    public void deprecatedMole(int coverPort) {
+        Mole mole = cover2Mole.remove(coverPort);
+        if (Objects.isNull(mole)) {
+            System.out.println("deprecatedMole failed:" + coverPort);
+            return;
+        }
         ProxyServer proxyServer = proxyServers.remove(mole);
         if (proxyServer == null) {
+            System.out.println("deprecatedMole failed:" + mole);
             return;
         }
         proxyServer.stop();

@@ -9,9 +9,11 @@ import java.util.Set;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import luluouter.controller.model.RestMole;
+import luluouter.controller.model.RestMoleResponse;
 import luluouter.msg.inner.InnerMsgClientMaster;
 import luluouter.msg.model.Mole;
 import luluouter.msg.model.Pigeon;
@@ -21,11 +23,23 @@ import luluouter.msg.outer.ProxyServerMaster;
 public class MoleController {
 
     @RequestMapping("/moles")
-    public List<Mole> getMoles() {
-        List<Mole> result = new ArrayList<Mole>();
+    public List<RestMoleResponse> getMoles() {
+        List<RestMoleResponse> result = new ArrayList<RestMoleResponse>();
 
         Set<Mole> set = ProxyServerMaster.getInstance().getMoles();
-        result.addAll(set);
+
+        for (Mole mole : set) {
+            RestMoleResponse restMoleResponse = new RestMoleResponse();
+            restMoleResponse.setCoverPort(mole.getCoverPort());
+            restMoleResponse.setPigeonCode(mole.getPigeon().getCode());
+            restMoleResponse.setPigeonAddress(mole.getPigeon().getAddress());
+            restMoleResponse.setMoleIp(mole.getIp());
+            restMoleResponse.setMolePort(mole.getPort());
+
+            restMoleResponse.setStatus(InnerMsgClientMaster.getInstance().hasPigeon(mole.getPigeon()));
+
+            result.add(restMoleResponse);
+        }
 
         return result;
     }
@@ -33,13 +47,6 @@ public class MoleController {
     @RequestMapping(value = "/addmole", method = RequestMethod.POST)
     public Map addMoles(@RequestBody RestMole restMole) {
         Map result = new HashMap();
-
-//        if (params == null || params.isEmpty()) {
-//            result.put("result", "failed");
-//            return result;
-//        }
-
-        // RestMole restMole = JSON.parseObject(params, RestMole.class);
 
         int coverPort = restMole.getCoverPort();
         String pigeonCode = restMole.getPigeonCode();
@@ -57,6 +64,21 @@ public class MoleController {
         Mole mole = new Mole(pigeon, coverPort, moleIp, molePort);
 
         boolean success = ProxyServerMaster.getInstance().lurkMole(mole);
+        if (!success) {
+            result.put("result", "failed");
+            return result;
+        }
+        result.put("result", "success");
+
+        return result;
+    }
+
+    @RequestMapping(value = "/delmole", method = RequestMethod.DELETE)
+    public Map delMole(@RequestParam(value = "coverPort") int coverPort) {
+        Map result = new HashMap();
+
+        ProxyServerMaster.getInstance().deprecatedMole(coverPort);
+
         result.put("result", "success");
 
         return result;
