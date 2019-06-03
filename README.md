@@ -23,4 +23,6 @@ data_port=5266
 
 其中outer_ip为服务端ip，msg_port和data_port两个端口和服务端配置文件一致即可
 
+3.通过网页http://127.0.0.1:1072/greeting 就可以灵活的配置端口映射关系
+
 欢迎大家和我通过 85045795@qq.com 交流
