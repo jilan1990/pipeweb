@@ -9,17 +9,24 @@ java -jar luluouter-0.1.0.jar(通过 mvn clean install 打包)
 需注意和luluouter-0.1.0.jar同路径下有配置文件
 
 conf/pipe.properties
+
 msg_port=5273
+
 data_port=5266
+
 
 2.首先开启客户端
 java -jar luluinner.jar(通过export打包可运行jar)
 需注意和luluouter.jar同路径下有配置文件
 
 conf/pipe.properties
+
 outer_ip=192.168.3.17
+
 msg_port=5273
+
 data_port=5266
+
 
 其中outer_ip为服务端ip，msg_port和data_port两个端口和服务端配置文件一致即可
 
