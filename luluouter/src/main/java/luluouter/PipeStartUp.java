@@ -1,5 +1,6 @@
 package luluouter;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -15,6 +16,12 @@ import luluouter.msg.inner.InnerMsgServer;
 @Component
 public class PipeStartUp implements ApplicationRunner {
 
+    private static final String MSG_PORT_KEY = "msg_port";
+    private static final int MSG_PORT_KEY_DEFAULT = 5273;
+
+    private static final String DATA_PORT_KEY = "data_port";
+    private static final int DATA_PORT_KEY_DEFAULT = 5266;
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
         init();
@@ -25,11 +32,13 @@ public class PipeStartUp implements ApplicationRunner {
         ConfigLoad configLoad = new ConfigLoad();
         Map<String, Object> configs = configLoad.loadConfig();
         if (configs == null) {
-            return;
+            configs = new HashMap<String, Object>();
+            configs.put(MSG_PORT_KEY, MSG_PORT_KEY_DEFAULT);
+            configs.put(DATA_PORT_KEY, DATA_PORT_KEY_DEFAULT);
         }
 
-        int msg_port = (int) configs.get("msg_port");
-        int data_port = (int) configs.get("data_port");
+        int msg_port = (int) configs.get(MSG_PORT_KEY);
+        int data_port = (int) configs.get(DATA_PORT_KEY);
         
         System.out.println("InnerDataServer ...\n");
         InnerDataServer innerDataServer = new InnerDataServer(data_port);
