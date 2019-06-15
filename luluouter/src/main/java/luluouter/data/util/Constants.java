@@ -1,4 +1,4 @@
-package luluinner.util;
+package luluouter.data.util;
 
 public class Constants {
 
@@ -10,8 +10,4 @@ public class Constants {
 
     public static final String OUTER_DATA_PORT_KEY = "outer_data_port";
     public static final int OUTER_DATA_PORT_DEFAULT = 5266;
-
-    public final static int BUFFER_LENGTH = 5 * 1024 * 1024;
-
-    public final static long RESTART_PERIOD = 30 * 60 * 1000;
 }

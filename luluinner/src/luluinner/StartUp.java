@@ -5,6 +5,7 @@ import java.util.Map;
 
 import luluinner.config.ConfigMaster;
 import luluinner.msg.upper.OuterMsgServer;
+import luluinner.util.Constants;
 
 public class StartUp {
 
@@ -22,12 +23,10 @@ public class StartUp {
         configLoad.setPigeonCode(pigeonCode);
 
         Map<String, Object> configs = configLoad.getConfigs();
-        if (configs == null) {
-            return;
-        }
-        String outer_ip = (String) configs.get("outer_ip");
-        int outer_msg_port = (Integer) configs.get("outer_msg_port");
-        int outer_data_port = (Integer) configs.get("outer_data_port");
+
+        String outer_ip = (String) configs.get(Constants.OUTER_IP_KEY);
+        int outer_msg_port = (Integer) configs.get(Constants.OUTER_MSG_PORT_KEY);
+        int outer_data_port = (Integer) configs.get(Constants.OUTER_DATA_PORT_KEY);
 
         System.out.println("OuterMsgMaster.begin:" + configs);
         OuterMsgServer outerMsgServer = new OuterMsgServer(outer_ip, outer_msg_port, pigeonCode, outer_data_port);

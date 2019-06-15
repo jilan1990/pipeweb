@@ -1,4 +1,4 @@
-package luluinner.config;
+package luluouter.config;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import luluinner.util.Constants;
+import luluouter.data.util.Constants;
 
 public class ConfigMaster {
 
@@ -18,7 +18,6 @@ public class ConfigMaster {
 
     private String path = "conf/pipe.properties";
     private Map<String, Object> configs = new HashMap<String, Object>();
-    private String pigeonCode = null;
 
     private ConfigMaster() {
         init();
@@ -46,9 +45,6 @@ public class ConfigMaster {
             Properties prop = new Properties();
             prop.load(bufferedReader);
 
-            String outer_ip = prop.getProperty(Constants.OUTER_IP_KEY, Constants.OUTER_IP_DEFAULT);
-            configs.put(Constants.OUTER_IP_KEY, outer_ip);
-
             String outer_msg_port = prop.getProperty(Constants.OUTER_MSG_PORT_KEY,
                     String.valueOf(Constants.OUTER_MSG_PORT_DEFAULT));
             configs.put(Constants.OUTER_MSG_PORT_KEY, Integer.parseInt(outer_msg_port));
@@ -60,13 +56,5 @@ public class ConfigMaster {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public void setPigeonCode(String pigeonCode) {
-        this.pigeonCode = pigeonCode;
-    }
-
-    public String getPigeonCode() {
-        return pigeonCode;
     }
 }
