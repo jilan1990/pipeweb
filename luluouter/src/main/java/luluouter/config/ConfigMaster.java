@@ -1,6 +1,7 @@
 package luluouter.config;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,7 +28,7 @@ public class ConfigMaster {
         return INSTANCE;
     }
 
-    private void init() {
+    public void init() {
         getConfig(path);
     }
 
@@ -38,6 +39,12 @@ public class ConfigMaster {
     private void getConfig(String path) {
 
         String encoding = "GBK";
+        File file = new File(path);
+        if (!file.exists()) {
+            configs.put(Constants.OUTER_MSG_PORT_KEY, Constants.OUTER_MSG_PORT_DEFAULT);
+            configs.put(Constants.OUTER_DATA_PORT_KEY, Constants.OUTER_DATA_PORT_DEFAULT);
+            return;
+        }
 
         try (InputStream is = Files.newInputStream(Paths.get(path));
                 InputStreamReader read = new InputStreamReader(is, encoding);
@@ -53,7 +60,7 @@ public class ConfigMaster {
                     String.valueOf(Constants.OUTER_DATA_PORT_DEFAULT));
             configs.put(Constants.OUTER_DATA_PORT_KEY, Integer.parseInt(outer_data_port));
 
-        } catch (IOException e) {
+        }  catch (IOException e) {
             e.printStackTrace();
         }
     }

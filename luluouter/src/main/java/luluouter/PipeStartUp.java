@@ -24,6 +24,7 @@ public class PipeStartUp implements ApplicationRunner {
     private void init() {
 
         ConfigMaster configLoad = ConfigMaster.getInstance();
+        configLoad.init();
         Map<String, Object> configs = configLoad.getConfigs();
 
         int outer_msg_port = (Integer) configs.get(Constants.OUTER_MSG_PORT_KEY);

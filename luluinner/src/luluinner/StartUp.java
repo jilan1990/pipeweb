@@ -19,6 +19,7 @@ public class StartUp {
         pigeonCode += "|" + ts;
 
         ConfigMaster configLoad = ConfigMaster.getInstance();
+        configLoad.init();
 
         configLoad.setPigeonCode(pigeonCode);
 
