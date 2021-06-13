@@ -4,7 +4,7 @@
 
 至此完成第二稿，本工具使用十分简单，仅需要环境安装java 8以上的jdk
 
-1.编译服务端(当前可以省略,luluouter-0.1.0.jar已经附在项目中)
+1.编译服务端(luluouter-0.1.0.jar已经附在项目中)
 通过 mvn clean install 打包luluouter这个maven工程
 
 2.编译客户端程序(当前可以省略,luluinner.jar已经附在项目中)
