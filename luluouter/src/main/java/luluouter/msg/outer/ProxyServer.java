@@ -1,7 +1,9 @@
 package luluouter.msg.outer;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -51,6 +53,13 @@ public class ProxyServer implements Runnable {
 
     public void stop() {
         stop = true;
+        if (Objects.nonNull(serverSocket)) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                System.out.println("ProxyServer.stop:mole" + mole);
+            }
+        }
     }
 
 }
