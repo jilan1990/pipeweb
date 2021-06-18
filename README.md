@@ -12,10 +12,10 @@
 
 2.编译客户端程序(当前可以省略,luluinner.jar已经附在项目中)
 
-将通过export打包可运行jar, 然后将luluinner.jar放到和luluouter-0.1.0.jar相同的路径
+将通过export打包可运行jar, 然后将luluinner.jar放到和luluouter-0.1.0.jar同一目录下，这样后面的客户端脚本luluinner.sh才能正常运行
 
 
-3.运行服务端
+3.运行服务端程序
 
 java -jar luluouter-0.1.0.jar
 
