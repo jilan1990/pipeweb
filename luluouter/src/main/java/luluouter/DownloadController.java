@@ -36,7 +36,7 @@ public class DownloadController {
             StringBuffer sb = new StringBuffer();
             sb.append("folder=\"conf\"");
             sb.append("\n");
-            sb.append("if [ ! -d \"$folder\"]; then");
+            sb.append("if [ ! -d \"$folder\" ]; then");
             sb.append("\n");
             sb.append("  mkdir \"$folder\"");
             sb.append("\n");
